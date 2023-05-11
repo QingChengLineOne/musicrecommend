@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>音乐推荐系统</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <script src="/static/js/jquery.min.js"></script>
+
+   <style>
+        /* 设置整体大框架 */
+        .overall{
+            /* 设置窗口大小 */
+            width: 1000px;
+            height: 500px;
+
+            /* 将弹性 <div> 元素的所有项目的居中对齐 */
+            align-items: center;
+
+            /* 设置图片外边距 左右居中 上方5% */
+
+        }
+
+        .content{
+            /* 设置相对定位 */
+            position: relative;
+            height: 400px;
+        }
+
+        .content ul{
+            /* 去除标签<ul><li></li></ul>默认加的样式 */
+            list-style-type: none;
+        }
+
+        .content ul>li{
+            width: 600px;
+            height: 300px;
+
+            /* 设置绝对定位 */
+            position: absolute;
+
+            /* 设置过度效果 时间为1s */
+            transition: 1s;
+
+            /* 设置最大透明度 默认一开始图片为透明的 当下面js加载的时候
+                第一张图片设置为不透明
+            */
+            opacity: 0;
+        }
+
+        /* 设置每个图片的样式 */
+        .content ul>li img{
+            /* 设置每一张图片的大小 */
+            width: 1000px;
+            height: 500px;
+
+            /* 设置圆角边框 */
+            border-radius: 5%;
+
+            /* 设置边框样式 */
+            border: 5px solid #0e0600;
+        }
+
+        /* 设置轮播图下面的小点 */
+        .content ol{
+            /* 设置相对定位 */
+            position: relative;
+
+            /* 设置网格布局 */
+            display: grid;
+
+            /* 设置网格布局中的列数及宽度 */
+            grid-template-columns: repeat(3, 75px);
+
+            /* 设置网格布局中的行数及宽度 */
+            grid-template-rows: auto;
+
+            /* 设置网格行与列之间的间隙 */
+            /* 间隙为1em */
+            grid-gap: 1em;
+            gap:1em;
+
+            /* 右浮动 */
+            float: right;
+
+            /* 设置浮点的向上的内边距 */
+            margin-top: 450px;
+
+            /* 去除列表样式 */
+            list-style: none;
+
+            /* 把图像的上边缘设置在其包含元素上边缘之下0px高的位置 */
+            top: 0;
+
+            /* 把图像的左边缘设置在其包含元素上边缘之下0px高的位置 */
+            left: 0px;
+        }
+
+        .content ol li{
+            /* 设置每个小点的大小 */
+            width: 25px;
+            height: 10px;
+
+            /* 设置里面的文字的大小 */
+            font-size: 15px;
+
+            /* line-height 属性设置行间的距离（行高） */
+            line-height: 20px;
+
+            /* 浮动左对齐 */
+            float: left;
+
+            /* 设置文本居中 */
+            text-align: center;
+
+            /* 把表格做成圆点 */
+            border-radius: 2em;
+
+            /* 设置圆点的边框 */
+            border: 5px solid #af9d9d;
+        }
+    </style>
+
+
+    {% block head %}{% endblock %}
+</head>
+<body>
+<div class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">音乐推荐系统</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">全部音乐</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/recommend">推荐音乐</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/play">正在播放</a>
+                </li>
+                {% if request.user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user">用户中心</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">注销</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sign_in">登录</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sign_up">注册</a>
+                    </li>
+                {% endif %}
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin">管理后台</a>
+                </li>
+            </ul>
+            <form class="form-inline my-2 my-lg-0" method="get" action="/search">
+                <input class="form-control mr-sm-2" type="search" placeholder="输入歌曲名称搜索" aria-label="Search" name="keyword">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit" name="action" value="song_name">搜歌曲</button>
+                <button class="btn btn-outline-primary my-2 my-sm-0 ml-2" type="submit" name="action" value="artist_name">搜歌手</button>
+            </form>
+        </div>
+    </nav>
+
+{#检查是否有任何消息需要显示#}
+    {% block alert %}
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags != 'console' %}
+                    <div class="alert alert-{{ message.tags }} mt-3" role="alert">
+                        {{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endblock %}
+
+<!-- 整体框架 -->
+    <div class="overall">
+        <!-- 内容  -->
+        <div class="content">
+            <!-- 轮播图片 -->
+            <ul>
+                <li><img src="../static/player/images/7.jpg" alt=""></li>
+                <li><img src="../static/player/images/3.jpg" alt=""></li>
+                <li><img src="../static/player/images/1.jpg" alt=""></li>
+            </ul>
+            <!-- 轮播图的点 -->
+            <ol>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ol>
+        </div>
+    </div>
+
+
+    {% block body %}{% endblock %}
+
+
+
+    <div class="card">
+        <div class="card-body">
+            <p class="card-text text-center">Copyright @ MusicRecommend</p>
+        </div>
+        <div class="card-footer text-center">2023</div>
+    </div>
+
+    {% block footer %}{% endblock %}
+</div>
+
+
+</body>
+
+<script>
+    // 当页面载入的时候加载这个函数
+    window.onload = function()
+    {
+
+    // 获取大盒子的内容 为content的第一个元素 也就是ul中的内容
+    var content = this.document.getElementsByClassName("content")[0];
+
+    // 获取ul中的li
+    var li = content.getElementsByTagName("li");
+
+    // 函数传入两个参数，(i,j)
+    function fun(i, j)
+    {//转换图片函数，就是把透明度改了一下
+        li[i].style.opacity=1;
+        li[j].style.opacity=0;
+
+        // 然后也把小图标的颜色改一下
+        // 把图标改成白色
+        // 如果图片数量发生改变 那么下面的3也要变成图片的数量
+        li[i + 3].style.backgroundColor = "#ffffff";
+
+        // 把图标改成透明
+        li[j + 3].style.backgroundColor = "#00000000";
+    }
+
+    // 默认情况下轮播图为第一张
+    fun(0, 1);//初始化下
+    var i = 0;
+    function auto()
+    {//轮播循环函数
+        i ++;
+        // 当数组越界的时候
+        if(i >= 3)
+        {
+        // 置为0
+            i = 0;
+            // 然后递归重新开始
+            // 这里的2位3-1的意思
+            fun(0, 2);
+        }
+        else
+        {
+            // 反之递归
+            fun(i, i - 1);
+        }
+    }
+    // 设置变化的时间
+    timer = this.setInterval(auto, 4000);
+
+    // 设置鼠标在轮播图上的时候 轮播图就停止播放
+    content.onmouseover = function ()
+    {
+        //鼠标划上去，停止轮播
+        clearInterval(timer);
+    }
+
+    // 设置鼠标在轮播图上的时候 轮播图就继续播放
+    content.onmouseout = function ()
+    {
+        //鼠标划出，继续轮播
+        timer = setInterval(auto, 4000); //调用定时器
+    }
+    var j = 0;
+    for(; j < 3; j++)
+    {
+        //点击小图标也可以转换图片
+        li[j + 3].index = j;
+        // 当点击小图标进行的函数
+        li[j + 3].onclick = function()
+        {
+            fun(this.index, i)
+            i = this.index;
+        }
+    }
+}
+</script>
+
+
+</html>

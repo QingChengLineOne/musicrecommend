@@ -1,0 +1,58 @@
+html,
+body {
+    height: 100%;
+    margin: 0;
+    font-family: arial, "Microsoft YaHei";
+    color: #FEFEFE;
+}
+
+ .返回{
+        background-image: url('../images/3.png');
+        background-repeat: no-repeat;
+        line-height: 0;
+        padding: 40px;/*使得照片能够显示出来，不信去掉试试*/
+        background-size:80px 80px;/*调整图片的大小*/
+        /*以上两条个人认为需要共同存在才能够保证正常显示*/
+        display: inline-block;
+        text-indent: -999px;
+    }
+
+body {
+    background-size: 100% 100%;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-image: url("../images/bg.jpg");
+    -webkit-transition: all .3s ease-out;
+    -moz-transition: all .3s ease-out;
+    -ms-transition: all .3s ease-out;
+    -o-transition: all .3s ease-out;
+    transition: all .3s ease-out;
+}
+
+#fileWrapper {
+    transition: all 0.5s ease;
+}
+
+#fileWrapper:hover {
+    opacity: 1 !important;
+}
+
+#visualizer_wrapper {
+    text-align: center;
+}
+
+footer {
+    position: fixed;
+    bottom: 2px;
+    color: #aaa;
+}
+
+.play-box {
+    position: fixed;
+    width: 1000px;
+    height: 100px;
+    margin: 0 auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
